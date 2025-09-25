@@ -8,6 +8,7 @@ gem "rails", github: "rails/rails", branch: "main"
 
 # Drivers
 gem "sqlite3", "~> 2.7"
+gem "pg", "~> 1.5", group: :production
 gem "redis", "~> 5.4"
 
 # Deployment
