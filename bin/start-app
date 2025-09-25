@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
 rm -f tmp/pids/server.pid
-./bin/rails db:prepare
+
+# Handle database setup for both SQLite and PostgreSQL
+if [[ "$DATABASE_URL" == postgres* ]]; then
+  # PostgreSQL: Create database if it doesn't exist, then run migrations
+  ./bin/rails db:create 2>/dev/null || true
+  ./bin/rails db:migrate
+else
+  # SQLite: Use db:prepare as before
+  ./bin/rails db:prepare
+fi
+
 ./bin/rails server
