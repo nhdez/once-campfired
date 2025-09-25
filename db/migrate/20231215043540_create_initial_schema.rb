@@ -127,8 +127,24 @@ class CreateInitialSchema < ActiveRecord::Migration[7.2]
     add_foreign_key "push_subscriptions", "users"
     add_foreign_key "searches", "users"
 
-    execute <<-SQL
-      create virtual table message_search_index using fts5(body, tokenize=porter);
-    SQL
+    # Create search index table - different for PostgreSQL vs SQLite
+    if connection.adapter_name == 'PostgreSQL'
+      # PostgreSQL: Create a regular table with GIN index for full-text search
+      execute <<-SQL
+        CREATE TABLE message_search_index (
+          message_id bigint NOT NULL,
+          body text,
+          body_tsvector tsvector GENERATED ALWAYS AS (to_tsvector('english', body)) STORED
+        );
+        CREATE INDEX idx_message_search_body ON message_search_index USING gin(body_tsvector);
+        ALTER TABLE message_search_index ADD CONSTRAINT fk_message_search_message_id
+          FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE;
+      SQL
+    else
+      # SQLite: Use FTS5 virtual table as before
+      execute <<-SQL
+        create virtual table message_search_index using fts5(body, tokenize=porter);
+      SQL
+    end
   end
 end
