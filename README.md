@@ -1,3 +1,5 @@
+### Near 1:1 version of Campfire with the added logic for working with PostgreSQL in production and some extra instructions for deploying via Dokku instead of barebones Docker.
+
 # Campfire
 
 Campfire is a web-based chat application. It supports many of the features you'd
